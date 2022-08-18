@@ -1,6 +1,40 @@
-import React from 'react'
+import React ,{ useState, useEffect} from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'
+
+function Clock() {
+  const [date, setDate] = useState(new Date())
+  useEffect(() => {
+    const timerID = setInterval(()=> setDate(new Date()) , 1000)
+    return () => clearInterval(timerID)
+  },[])
+  return <FormattedDate date={date} />
+}
+
+function FormattedDate(props) {
+  return  <h2>{props.date.toLocaleTimeString()}</h2>
+}
+
+
+function calculateWinner(squares) {
+  const lines = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6],
+  ];
+  for (let i = 0; i < lines.length; i++) {
+    const [a, b, c] = lines[i];
+    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+      return squares[a];
+    }
+  }
+  return null;
+}
 
 function Square(props){
   return (
@@ -10,38 +44,20 @@ function Square(props){
   )
 }
 
-class Board extends React.Component {
-
-  renderSquare(i) {
-    return (
-      <Square  
-        value={this.props.squares[i]}
-        onClick={()=> this.props.onClick(i)}
-      />
-    )
-  }
-
-  render() {
-    return (
-      <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-      </div>
-    );
-  }
+function Board(props){
+  return (
+    <div>
+      {
+        Array.from({length:3},(_, i) => (
+          <div className="board-row" key={i}>{
+            Array.from({length:3},(_, j) => (
+              <Square value={ props.squares[(i * 3) + j] } onClick={()=> props.onClick((i * 3) + j)}  key={(i * 3) + j}/>
+            ))
+          }</div>
+        ))
+      }
+    </div>
+  );
 }
 
 class Game extends React.Component {
@@ -92,7 +108,9 @@ class Game extends React.Component {
     })
     const status = winner ? 'Winner: ' + winner : 'Next player: ' + (this.state.xIsNext ? 'X' : 'O'); 
 
-    return (
+    return <>
+      <h1>React Tic Tac Toe</h1>
+      <Clock />
       <div className="game">
         <div className="game-board">
           <Board 
@@ -105,7 +123,7 @@ class Game extends React.Component {
           <ol>{moves}</ol>
         </div>
       </div>
-    );
+      </>
   }
 }
 
@@ -113,24 +131,3 @@ class Game extends React.Component {
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 root.render(<Game />);
-
-
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return null;
-}
